@@ -323,7 +323,6 @@ export default function Dashboard() {
                     <p className="text-xs text-gray-500 flex items-center gap-1.5 flex-wrap"></p>
                     <p className="text-xs text-gray-500 flex items-center gap-1.5 flex-wrap">
                       {t.Date.split('T')[0].split('-').reverse().join('/')} · {t.CategoryName}
-                      {t.IsRecurring && ' · Recorrente'}
                       {t.PaymentMethod && (
                         <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${paymentColors[t.PaymentMethod]}`}>
                           {paymentLabels[t.PaymentMethod]}

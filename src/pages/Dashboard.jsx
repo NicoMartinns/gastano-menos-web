@@ -214,40 +214,46 @@ export default function Dashboard() {
           </div>
 
           {/* Cards */}
-          <div className="grid grid-cols-3 divide-x divide-gray-800">
-            <div className="p-4">
-              <p className="text-xs text-gray-400 mb-1">Receitas</p>
-              <p className="text-lg font-bold text-green-400">
-                {formatCurrency(totalIncome)}
-              </p>
-            </div>
-            <div className="p-4">
-              <p className="text-xs text-gray-400 mb-1">
-                {viewMode === 'unpaid' ? 'A pagar' : 'Despesas'}
-              </p>
-              <p className="text-lg font-bold text-red-400">
-                {formatCurrency(
-                  viewMode === 'paid' ? paidExpense :
-                  viewMode === 'unpaid' ? unpaidExpense :
-                  totalExpense
-                )}
-              </p>
-            </div>
-            <div className="p-4">
-              <p className="text-xs text-gray-400 mb-1">Saldo</p>
-              <p className={`text-lg font-bold ${
-                (viewMode === 'paid' ? totalIncome - paidExpense :
-                viewMode === 'unpaid' ? totalIncome - unpaidExpense :
-                balance) >= 0 ? 'text-violet-400' : 'text-red-400'
-              }`}>
-                {formatCurrency(
-                  viewMode === 'paid' ? totalIncome - paidExpense :
-                  viewMode === 'unpaid' ? totalIncome - unpaidExpense :
-                  balance
-                )}
-              </p>
-            </div>
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <div className="p-3 sm:p-4">
+            <p className="text-xs text-gray-400 mb-1">
+              {viewMode === 'unpaid' ? 'A receber' : 'Receitas'}
+            </p>
+            <p className="text-sm sm:text-lg font-bold text-green-400 truncate">
+              {formatCurrency(
+                viewMode === 'paid' ? paidIncome :
+                viewMode === 'unpaid' ? unpaidIncome :
+                totalIncome
+              )}
+            </p>
           </div>
+          <div className="p-3 sm:p-4">
+            <p className="text-xs text-gray-400 mb-1">Despesas</p>
+            <p className="text-sm sm:text-lg font-bold text-red-400 truncate">
+              {formatCurrency(
+                viewMode === 'paid' ? paidExpense :
+                viewMode === 'unpaid' ? unpaidExpense :
+                totalExpense
+              )}
+            </p>
+          </div>
+          <div className="p-3 sm:p-4">
+            <p className="text-xs text-gray-400 mb-1">
+              {viewMode === 'unpaid' ? 'A pagar líquido' : 'Saldo'}
+            </p>
+            <p className={`text-sm sm:text-lg font-bold truncate ${
+              (viewMode === 'paid' ? paidIncome - paidExpense :
+              viewMode === 'unpaid' ? unpaidIncome - unpaidExpense :
+              balance) >= 0 ? 'text-violet-400' : 'text-red-400'
+            }`}>
+              {formatCurrency(
+                viewMode === 'paid' ? paidIncome - paidExpense :
+                viewMode === 'unpaid' ? unpaidIncome - unpaidExpense :
+                balance
+              )}
+            </p>
+          </div>
+        </div>
         </div>
 
         {/* Filtros */}
@@ -317,21 +323,21 @@ export default function Dashboard() {
           ) : (
             <ul className="divide-y divide-gray-800">
               {filteredTransactions.map(t => (
-                  <li key={t.ID} className="px-4 py-3 flex items-center justify-between group">
-                    <div>
-                    <p className="text-sm font-medium mb-2">{t.Description}</p>
-                    <p className="text-xs text-gray-500 flex items-center gap-1.5 flex-wrap"></p>
-                    <p className="text-xs text-gray-500 flex items-center gap-1.5 flex-wrap">
-                      {t.Date.split('T')[0].split('-').reverse().join('/')} · {t.CategoryName}
+                  <li key={t.ID} className="px-4 py-3 flex items-center justify-between gap-3 group">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium mb-0.5">{t.Description}</p>
+                      <p className="text-xs text-gray-500">
+                        {t.Date.split('T')[0].split('-').reverse().join('/')} · {t.CategoryName}
+                        {t.IsRecurring && ' · Recorrente'}
+                      </p>
                       {t.PaymentMethod && (
-                        <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${paymentColors[t.PaymentMethod]}`}>
+                        <span className={`inline-block mt-1 px-1.5 py-0.5 rounded text-xs font-medium ${paymentColors[t.PaymentMethod]}`}>
                           {paymentLabels[t.PaymentMethod]}
                         </span>
                       )}
-                    </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`text-sm font-semibold ${t.Type === 'INCOME' ? 'text-green-400' : 'text-red-400'}`}>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className={`text-sm font-semibold whitespace-nowrap ${t.Type === 'INCOME' ? 'text-green-400' : 'text-red-400'}`}>
                         {t.Type === 'EXPENSE' ? '- ' : '+ '}{formatCurrency(t.Amount)}
                       </span>
                       <button onClick={() => setEditingTransaction(t)}

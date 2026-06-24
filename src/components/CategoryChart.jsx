@@ -84,7 +84,7 @@ export default function CategoryChart({ transactions, categories }) {
       ) : (
         <>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={chartData}>
+            <BarChart data={chartData} style={{ outline: 'none' }}>
               <XAxis dataKey="name" tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: '#9ca3af', fontSize: 11 }} axisLine={false} tickLine={false}
                 tickFormatter={(v) => {
@@ -93,7 +93,8 @@ export default function CategoryChart({ transactions, categories }) {
                 }} />
               <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
               <Bar dataKey="total" radius={[6, 6, 0, 0]} cursor="pointer"
-                onClick={(data) => handleBarClick(data)}>
+                onClick={(data) => handleBarClick(data)}
+                style={{ outline: 'none' }}>
                 {chartData.map((entry, i) => (
                   <Cell key={i} fill={mainColor}
                     opacity={selected && selected.id !== entry.id ? 0.3 : 1} />
@@ -123,10 +124,11 @@ export default function CategoryChart({ transactions, categories }) {
               {drillData.length === 0 ? (
                 <p className="text-xs text-gray-500">Sem subcategorias com lançamentos</p>
               ) : (
-                <ResponsiveContainer width="100%" height={180}>
+                <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
                     <Pie data={drillData} dataKey="total" nameKey="name"
-                      cx="50%" cy="50%" outerRadius={70} paddingAngle={3}>
+                      cx="50%" cy="50%" outerRadius={60} paddingAngle={3}
+                      style={{ outline: 'none' }}>
                       {drillData.map((entry, i) => (
                         <Cell key={i} fill={subColors[i % subColors.length]} />
                       ))}

@@ -139,6 +139,14 @@ export default function Dashboard() {
   const unpaidExpense = filteredTransactions
     .filter(t => t.Type === 'EXPENSE' && new Date(t.Date) > today)
     .reduce((acc, t) => acc + t.Amount, 0)
+  
+  const paidIncome = filteredTransactions
+  .filter(t => t.Type === 'INCOME' && new Date(t.Date) <= today)
+  .reduce((acc, t) => acc + t.Amount, 0)
+
+  const unpaidIncome = filteredTransactions
+    .filter(t => t.Type === 'INCOME' && new Date(t.Date) > today)
+    .reduce((acc, t) => acc + t.Amount, 0)
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">

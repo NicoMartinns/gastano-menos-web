@@ -114,10 +114,18 @@ export default function Dashboard() {
     }
   }
 
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
   const filteredTransactions = transactions
     .filter(t => filterType === 'ALL' || t.Type === filterType)
     .filter(t => filterCategory === '' || t.CategoryID === filterCategory)
     .filter(t => filterPayment === '' || t.Type === 'INCOME' || t.PaymentMethod === filterPayment)
+    .filter(t => {
+      if (viewMode === 'paid') return new Date(t.Date) <= today
+      if (viewMode === 'unpaid') return new Date(t.Date) > today
+      return true
+    })
 
   const totalIncome = filteredTransactions
     .filter(t => t.Type === 'INCOME')
@@ -128,9 +136,6 @@ export default function Dashboard() {
     .reduce((acc, t) => acc + t.Amount, 0)
 
   const balance = totalIncome - totalExpense
-
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
 
   const paidExpense = filteredTransactions
     .filter(t => t.Type === 'EXPENSE' && new Date(t.Date) <= today)

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../api/client'
+import { useAuth } from '../auth/context'
 import logo from '../assets/login-icon.png'
 
 export default function Login() {
@@ -9,6 +9,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -16,11 +17,12 @@ export default function Login() {
     setError('')
 
     try {
-      const response = await api.post('/auth/login', { email, password })
-      localStorage.setItem('token', response.data.token)
-      navigate('/')
-    } catch {
-      setError('Email ou senha inválidos')
+      await login(email, password)
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(err.response?.status === 401
+        ? 'Credenciais inválidas ou acesso não liberado. Consulte o administrador.'
+        : 'Não foi possível entrar. Tente novamente.')
     } finally {
       setLoading(false)
     }

@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/client'
+import { useAuth } from '../auth/context'
 import NewTransactionModal from '../components/NewTransactionModal'
 import CategoryChart from '../components/CategoryChart'
 import EditTransactionModal from '../components/EditTransactionModal'
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const { user, logout } = useAuth()
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -42,43 +44,39 @@ export default function Dashboard() {
     cash: 'bg-gray-500/20 text-gray-400',
   }
 
+  const fetchCategories = useCallback(() => {
+    return api.get('/categories')
+      .then(({ data }) => setCategories(data || []))
+      .catch(() => setCategories([]))
+  }, [])
+
+  const fetchTransactions = useCallback(() => {
+    return api.get(`/transactions?year=${year}&month=${month}`)
+      .then(({ data }) => setTransactions(data || []))
+      .catch(() => navigate('/login'))
+      .finally(() => setLoading(false))
+  }, [year, month, navigate])
+
   useEffect(() => {
-    fetchTransactions()
-    fetchCategories()
-  }, [year, month])
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get('/categories')
-      setCategories(response.data || [])
-    } catch {}
-  }
-
-  const fetchTransactions = async () => {
-    setLoading(true)
-    try {
-      const response = await api.get(`/transactions?year=${year}&month=${month}`)
-      setTransactions(response.data || [])
-    } catch {
-      navigate('/login')
-    } finally {
-      setLoading(false)
-    }
-  }
+    void fetchTransactions()
+    void fetchCategories()
+  }, [fetchTransactions, fetchCategories])
 
   const prevMonth = () => {
+    setLoading(true)
     if (month === 1) { setMonth(12); setYear(y => y - 1) }
     else setMonth(m => m - 1)
   }
 
   const nextMonth = () => {
+    setLoading(true)
     if (month === 12) { setMonth(1); setYear(y => y + 1) }
     else setMonth(m => m + 1)
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    navigate('/login')
+    logout()
+    navigate('/login', { replace: true })
   }
 
   const formatCurrency = (value) =>
@@ -168,6 +166,12 @@ export default function Dashboard() {
             </button>
 
             {/* Links desktop */}
+            {user.role === 'ADMIN' && (
+              <button onClick={() => navigate('/admin/users')}
+                className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block">
+                Usuários
+              </button>
+            )}
             <button onClick={() => navigate('/categories')}
               className="text-sm text-gray-400 hover:text-white transition-colors hidden sm:block">
               Categorias
@@ -187,12 +191,14 @@ export default function Dashboard() {
                 if (v === 'categories') navigate('/categories')
                 else if (v === 'report') navigate('/report')
                 else if (v === 'logout') handleLogout()
+                else if (v === 'users') navigate('/admin/users')
                 e.target.value = ''
               }}
               className="sm:hidden bg-gray-800 text-gray-300 text-sm rounded-lg px-2 py-2 border border-gray-700 focus:outline-none cursor-pointer w-12">
               <option value="" hidden>☰</option>
               <option value="categories">Categorias</option>
               <option value="report">Relatório</option>
+              {user.role === 'ADMIN' && <option value="users">Usuários</option>}
               <option value="logout">Sair</option>
             </select>
           </div>
